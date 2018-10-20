@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>文章类型管理</title>
+    <script src="/static/js/jquery.js" type="text/javascript"></script>
+    <script src="/static/js/jquery.easyui.min.js" type="text/javascript"></script>
+    <script src="/static/js/easyui-lang-zh_CN.js" type="text/javascript"></script>
+    <link href="/static/css/themes/default/easyui.css" rel="stylesheet" />
+    <link href="/static/css/themes/icon.css" rel="stylesheet" />
+    <script>
+        function loadData() {
+            $('#tt').treegrid({
+                title: '栏目管理',
+                iconCls: 'icon-save',
+                width: 500,
+                height: 350,
+                nowrap: false,
+                rownumbers: true,
+                animate: true,
+                collapsible: true,
+                url: '/Admin/ArticleClass/ShowArticleClass',
+                idField: 'Id',
+                treeField: 'ClassName',
+                lines: true,
+                columns: [[
+                    { field: 'Id', title: '编号', width: 150, rowspan: 2 },
+                    { field: 'ClassName', title: '栏目名称', width: 120 },
+                    { field: 'Remark', title: '备注', width: 120, rowspan: 2 }
+
+                ]],
+                onClickRow: function (row) {
+                    //根据所单击的行，获取对应的子类别.
+                    $.post("/Admin/ArticleClass/ShowChildClass", { "id": row.Id }, function (data) {
+                        //先清空，后追加.如果没有数据不追加
+                        if (data.rows.length != 0) {
+                            var nodes = $('#tt').treegrid('getChildren', row.Id);
+                            for (var i = 0; i < nodes.length; i++) {
+                                $('#tt').treegrid('remove', nodes[i].id);
+                            }
+                            $('#tt').treegrid('append', {
+                                parent: row.Id,
+                                data: data.rows
+                            });
+                        }
+                    });
+                },
+                toolbar: [
+                    {
+                        id: 'btnAddParent',
+                        text: '添加根栏目',
+                        iconCls: 'icon-add',
+                        handler: function () {
+                            addParentArticle();
+
+                        }
+                    }
+                    ,{
+                        id: 'btnAdd',
+                        text: '添加子栏目',
+                        iconCls: 'icon-add',
+                        handler: function () {
+                            addChildArticle();
+
+                        }
+                    }, {
+                        id: 'btnEdit',
+                        text: '编辑',
+                        iconCls: 'icon-edit',
+                        handler: function () {
+                            // showChildArticle();
+
+                        }
+                    }]
+            })
+        }
+    </script>
+</head>
+<body>
+<table id="tt"></table>
+</body>
+</html>
